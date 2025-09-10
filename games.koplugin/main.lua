@@ -13,6 +13,7 @@ local TextWidget = require("ui/widget/textwidget")
 local Button = require("ui/widget/button")
 local Blitbuffer = require("ffi/blitbuffer")
 local Screen = Device.screen
+local Input = Device.input
 local Size = require("ui/size")
 local Font = require("ui/font")
 local _ = require("gettext")

@@ -8,7 +8,6 @@ local Font = require("ui/font")
 local RenderText = require("ui/rendertext")
 local _ = require("gettext")
 local logger = require("logger")
-local lfs = require("libs/libkoreader-lfs")
 
 local DoomGame = BaseGame:new{
     game_title = _("Doom"),
@@ -234,7 +233,7 @@ function DoomGame:renderGame()
     if not self.wad_loaded then
         -- Show loading or error message
         self.canvas.bb:fill(Blitbuffer.COLOR_BLACK)
-        self:drawText(self.canvas.width / 2, self.canvas.height / 2,
+        self:drawText(self.canvas_width / 2, self.canvas_height / 2,
                      _("Loading WAD file..."), Blitbuffer.COLOR_WHITE)
         BaseGame.renderGame(self)
         return
@@ -249,12 +248,12 @@ end
 function DoomGame:renderRaycast()
     self.canvas.bb:fill(Blitbuffer.COLOR_BLACK)
     
-    local screen_width = self.canvas.width
-    local screen_height = self.canvas.height
+    local screen_width = self.canvas_width
+    local screen_height = self.canvas_height
     
     -- Simple sky/floor colors
-    local sky_color = Blitbuffer.COLOR_BLUE
-    local floor_color = Blitbuffer.COLOR_GRAY
+    local sky_color = Blitbuffer.COLOR_GRAY
+    local floor_color = Blitbuffer.COLOR_BLACK
     
     -- Fill sky and floor
     self.canvas.bb:paintRect(0, 0, screen_width, screen_height / 2, sky_color)
@@ -273,11 +272,7 @@ function DoomGame:renderRaycast()
             
             -- Simple wall color based on distance
             local color_intensity = math.max(0.2, 1 - distance / self.max_depth)
-            local wall_color = {
-                r = color_intensity,
-                g = color_intensity,
-                b = color_intensity,
-            }
+            local wall_color = Blitbuffer.COLOR_WHITE
             
             -- Draw wall column
             self.canvas.bb:paintRect(x, wall_top, 1, wall_height, wall_color)

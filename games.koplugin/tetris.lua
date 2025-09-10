@@ -53,18 +53,18 @@ local PIECES = {
 }
 
 local PIECE_COLORS = {
-    I = Blitbuffer.COLOR_BLUE,
-    O = Blitbuffer.COLOR_GREEN,
-    T = Blitbuffer.COLOR_RED,
-    S = Blitbuffer.COLOR_YELLOW,
-    Z = Blitbuffer.COLOR_ORANGE,
-    J = Blitbuffer.COLOR_PURPLE,
-    L = Blitbuffer.COLOR_CYAN,
+    I = Blitbuffer.COLOR_WHITE,
+    O = Blitbuffer.COLOR_WHITE,
+    T = Blitbuffer.COLOR_WHITE,
+    S = Blitbuffer.COLOR_WHITE,
+    Z = Blitbuffer.COLOR_WHITE,
+    J = Blitbuffer.COLOR_WHITE,
+    L = Blitbuffer.COLOR_WHITE,
 }
 
 function TetrisGame:initGame()
     -- Calculate block size based on available space
-    local canvas_height = self.game_height - self.control_height
+    local canvas_height = self.canvas_height
     self.block_size = math.min(
         math.floor(self.game_width / self.board_width),
         math.floor(canvas_height / self.board_height)
@@ -276,7 +276,7 @@ function TetrisGame:renderGame()
     local board_pixel_width = self.board_width * self.block_size
     local board_pixel_height = self.board_height * self.block_size
     local start_x = math.floor((self.game_width - board_pixel_width) / 2)
-    local start_y = math.floor((self.canvas.height - board_pixel_height) / 2)
+    local start_y = math.floor((self.canvas_height - board_pixel_height) / 2)
     
     -- Draw board
     for y = 1, self.board_height do

@@ -17,7 +17,7 @@ local SnakeGame = BaseGame:new{
 
 function SnakeGame:initGame()
     -- Calculate block size based on available space
-    local canvas_height = self.game_height - self.control_height
+    local canvas_height = self.canvas_height
     self.block_size = math.min(
         math.floor(self.game_width / self.board_width),
         math.floor(canvas_height / self.board_height)
@@ -159,11 +159,11 @@ function SnakeGame:renderGame()
     local board_pixel_width = self.board_width * self.block_size
     local board_pixel_height = self.board_height * self.block_size
     local start_x = math.floor((self.game_width - board_pixel_width) / 2)
-    local start_y = math.floor((self.canvas.height - board_pixel_height) / 2)
+    local start_y = math.floor((self.canvas_height - board_pixel_height) / 2)
     
     -- Draw snake
     for i, segment in ipairs(self.snake) do
-        local color = i == 1 and Blitbuffer.COLOR_GREEN or Blitbuffer.COLOR_DARK_GREEN
+        local color = i == 1 and Blitbuffer.COLOR_WHITE or Blitbuffer.COLOR_GRAY
         self:drawBlock(start_x + (segment.x - 1) * self.block_size,
                       start_y + (segment.y - 1) * self.block_size,
                       color)
@@ -172,7 +172,7 @@ function SnakeGame:renderGame()
     -- Draw food
     self:drawBlock(start_x + (self.food.x - 1) * self.block_size,
                   start_y + (self.food.y - 1) * self.block_size,
-                  Blitbuffer.COLOR_RED)
+                  Blitbuffer.COLOR_WHITE)
     
     BaseGame.renderGame(self)
 end

@@ -26,7 +26,7 @@ local CELL_MINE = -1
 
 function MinesweeperGame:initGame()
     -- Calculate cell size based on available space
-    local canvas_height = self.game_height - self.control_height
+    local canvas_height = self.canvas_height
     self.cell_size = math.min(
         math.floor(self.game_width / self.board_width),
         math.floor(canvas_height / self.board_height)
@@ -240,7 +240,7 @@ function MinesweeperGame:renderGame()
     local board_pixel_width = self.board_width * self.cell_size
     local board_pixel_height = self.board_height * self.cell_size
     local start_x = math.floor((self.game_width - board_pixel_width) / 2)
-    local start_y = math.floor((self.canvas.height - board_pixel_height) / 2)
+    local start_y = math.floor((self.canvas_height - board_pixel_height) / 2)
     
     -- Draw cells
     for y = 1, self.board_height do
@@ -263,15 +263,15 @@ function MinesweeperGame:drawCell(x, y, grid_x, grid_y)
     local cell_value = self.board[grid_y][grid_x]
     
     -- Cell background
-    local bg_color = Blitbuffer.COLOR_LIGHT_GRAY
+    local bg_color = Blitbuffer.COLOR_GRAY
     if is_revealed then
-        bg_color = cell_value == CELL_MINE and Blitbuffer.COLOR_RED or Blitbuffer.COLOR_WHITE
+        bg_color = cell_value == CELL_MINE and Blitbuffer.COLOR_BLACK or Blitbuffer.COLOR_WHITE
     end
     
     self.canvas.bb:paintRect(x, y, size, size, bg_color)
     
     -- Cell border
-    local border_color = is_selected and Blitbuffer.COLOR_BLUE or Blitbuffer.COLOR_BLACK
+    local border_color = is_selected and Blitbuffer.COLOR_WHITE or Blitbuffer.COLOR_BLACK
     self.canvas.bb:paintRect(x, y, size, 1, border_color)
     self.canvas.bb:paintRect(x, y, 1, size, border_color)
     self.canvas.bb:paintRect(x + size - 1, y, 1, size, border_color)
@@ -280,7 +280,7 @@ function MinesweeperGame:drawCell(x, y, grid_x, grid_y)
     -- Cell content
     if is_flagged then
         -- Draw flag (simple 'F')
-        self:drawText(x, y, "F", Blitbuffer.COLOR_RED)
+        self:drawText(x, y, "F", Blitbuffer.COLOR_BLACK)
     elseif is_revealed then
         if cell_value == CELL_MINE then
             -- Draw mine (simple '*')

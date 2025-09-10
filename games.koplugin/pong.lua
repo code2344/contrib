@@ -14,8 +14,8 @@ local PongGame = BaseGame:new{
 
 function PongGame:initGame()
     -- Game dimensions
-    self.game_width = self.canvas.width
-    self.game_height = self.canvas.height
+    self.game_width = self.canvas_width
+    self.game_height = self.canvas_height
     
     -- Paddle settings
     self.paddle_width = 10
