@@ -19,11 +19,16 @@ All games feature intuitive on-screen controls optimized for touchscreen devices
 - Exit option
 
 ### Doom WAD Support
-The plugin supports loading original Doom WAD files:
-- Compatible with IWAD and PWAD files
-- File picker dialog for selecting WAD files
-- Basic raycasting 3D rendering
-- Movement and turning controls
+The plugin supports loading original Doom WAD files with full gameplay:
+- Compatible with IWAD and PWAD files (Doom, Doom II, Final Doom)
+- Complete WAD file parsing including maps, textures, and game data
+- Authentic Doom engine with proper level geometry and physics
+- Full entity system including enemies, items, weapons, and pickups
+- Proper game mechanics: health, armor, ammo, scoring, and progression
+- Enemy AI with line-of-sight, pathfinding, and combat behaviors
+- Multiple weapon types: Fist, Shotgun, Chaingun, Rocket Launcher
+- Level completion detection and exit handling
+- Authentic raycasting 3D renderer optimized for e-ink displays
 
 ## Installation
 
@@ -42,11 +47,24 @@ The plugin supports loading original Doom WAD files:
 
 ### Playing Doom
 1. Select "Doom" from the games menu
-2. Choose a WAD file using the file picker
-3. Use the movement controls:
+2. Choose a WAD file using the file picker (DOOM.WAD, DOOM2.WAD, etc.)
+3. Use the comprehensive movement and combat controls:
    - ↑/↓: Move forward/backward
    - ◄/►: Turn left/right
    - ←/→: Strafe left/right
+   - Fire: Attack with current weapon
+   - Use: Activate doors, switches, and pickups
+   - Weapon: Switch between available weapons
+   - Pause: Pause game (press again when dead to restart)
+
+#### Doom Gameplay Features
+- **Combat System**: Fight against classic Doom enemies with proper AI
+- **Weapon Arsenal**: Fist, Shotgun, Chaingun, Rocket Launcher with realistic ammo management
+- **Health & Armor**: Collect health packs and armor for protection
+- **Level Progression**: Complete levels by eliminating all enemies and finding exits
+- **Scoring System**: Earn points for defeating enemies
+- **Authentic Physics**: Proper collision detection and movement mechanics
+- **Item Collection**: Pick up weapons, ammo, health, and armor throughout levels
 
 ### Game Controls
 
@@ -104,9 +122,17 @@ The plugin architecture supports adding new games:
 ## Troubleshooting
 
 ### Common Issues
-- **Game won't start**: Check that all required files are present
-- **Controls not responding**: Ensure KOReader is up to date
-- **Doom WAD not loading**: Verify WAD file is valid and accessible
+- **Game won't start**: Check that all required files are present and paths are correct
+- **Controls not responding**: Ensure KOReader is up to date and touch interface is working
+- **Doom WAD not loading**: Verify WAD file is valid, accessible, and is an official IWAD/PWAD
+- **Doom crashes or freezes**: Large levels may require more memory; try simpler WAD files first
+- **Poor Doom performance**: Complex levels may run slowly on older devices; this is normal
+
+### Doom-Specific Troubleshooting
+- **"Loading WAD file..." stuck**: WAD file may be corrupted or incompatible
+- **No enemies/items appear**: WAD file may be missing THINGS data
+- **Level geometry missing**: WAD file may have corrupted level data
+- **Controls feel sluggish**: Adjust movement speed in game settings if available
 
 ### Performance Issues
 - Lower frame rates on older devices is normal
@@ -116,8 +142,9 @@ The plugin architecture supports adding new games:
 ## Requirements
 
 - KOReader v2023.01 or later
-- For Doom: Valid IWAD or PWAD file
-- Minimum 50MB free space for full installation
+- For Doom: Valid IWAD file (DOOM.WAD, DOOM2.WAD, PLUTONIA.WAD, TNT.WAD) or compatible PWAD
+- Minimum 100MB free space for full installation with WAD files
+- Sufficient memory for complex level geometry (typically 64MB+ recommended for Doom)
 
 ## License
 

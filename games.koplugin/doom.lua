@@ -273,6 +273,14 @@ function DoomGame:addGameControls()
         padding = Size.padding.button,
     }
     
+    local weapon_btn = Button:new{
+        text = _("Weapon"),
+        callback = function() self:nextWeapon() end,
+        bordersize = Size.border.button,
+        margin = Size.margin.button,
+        padding = Size.padding.button,
+    }
+    
     table.insert(self.controls, forward_btn)
     table.insert(self.controls, backward_btn)
     table.insert(self.controls, turn_left_btn)
@@ -281,6 +289,20 @@ function DoomGame:addGameControls()
     table.insert(self.controls, strafe_right_btn)
     table.insert(self.controls, fire_btn)
     table.insert(self.controls, use_btn)
+    table.insert(self.controls, weapon_btn)
+end
+
+function DoomGame:nextWeapon()
+    -- Cycle through available weapons
+    local current = self.player.current_weapon
+    for i = 1, 4 do
+        current = current + 1
+        if current > 4 then current = 1 end
+        if self.player.weapons[current] then
+            self.player.current_weapon = current
+            break
+        end
+    end
 end
 
 function DoomGame:loadWADFile()
@@ -864,19 +886,55 @@ function DoomGame:updateGame()
         local proj = self.projectiles[i]
         proj.x = proj.x + proj.dx
         proj.y = proj.y + proj.dy
+        proj.life_time = proj.life_time - 1
         
-        -- Check collision
+        -- Check collision or timeout
         if not self:canMove(proj.x, proj.y) or 
-           self:checkProjectileHit(proj) then
+           self:checkProjectileHit(proj) or
+           proj.life_time <= 0 then
+            
+            -- Explosion damage for rockets
+            if proj.type == "rocket" then
+                self:explode(proj.x, proj.y, proj.damage)
+            end
+            
             table.remove(self.projectiles, i)
         end
     end
     
+    -- Check level exit
+    self:checkLevelExit()
+    
     -- Check win/lose conditions
     if self.player.health <= 0 then
         self.game_state = "dead"
-    elseif self:allEnemiesDead() then
+    elseif self:allEnemiesDead() and self.game_state == "playing" then
         self.game_state = "victory"
+    end
+end
+
+function DoomGame:explode(x, y, damage)
+    -- Damage all entities within explosion radius
+    local explosion_radius = 128
+    
+    -- Damage player if in range
+    local player_dist = math.sqrt((x - self.player.x)^2 + (y - self.player.y)^2)
+    if player_dist < explosion_radius then
+        local damage_factor = 1 - (player_dist / explosion_radius)
+        local actual_damage = damage * damage_factor
+        self.player.health = self.player.health - actual_damage
+    end
+    
+    -- Damage entities
+    for _, entity in ipairs(self.entities) do
+        if entity.active then
+            local dist = math.sqrt((x - entity.x)^2 + (y - entity.y)^2)
+            if dist < explosion_radius then
+                local damage_factor = 1 - (dist / explosion_radius)
+                local actual_damage = damage * damage_factor
+                self:damageEntity(entity, actual_damage)
+            end
+        end
     end
 end
 
@@ -886,17 +944,102 @@ function DoomGame:updateEnemyAI(entity)
     local dy = self.player.y - entity.y
     local dist = math.sqrt(dx * dx + dy * dy)
     
+    -- Only active if player is relatively close and has line of sight
     if dist < 512 and self:hasLineOfSight(entity.x, entity.y, self.player.x, self.player.y) then
-        -- Move towards player
-        local move_speed = 0.5
-        entity.x = entity.x + (dx / dist) * move_speed
-        entity.y = entity.y + (dy / dist) * move_speed
+        -- Calculate movement direction
+        local move_speed = self:getEnemySpeed(entity.type)
+        local new_x = entity.x + (dx / dist) * move_speed
+        local new_y = entity.y + (dy / dist) * move_speed
         
-        -- Attack if close enough
-        if dist < 64 and math.random() < 0.1 then
-            self:enemyAttack(entity)
+        -- Check if enemy can move to new position
+        if self:canMove(new_x, new_y) then
+            entity.x = new_x
+            entity.y = new_y
+        end
+        
+        -- Attack if close enough and attack timer allows
+        if dist < 64 then
+            entity.attack_timer = (entity.attack_timer or 0) - 1
+            if entity.attack_timer <= 0 then
+                self:enemyAttack(entity)
+                entity.attack_timer = self:getAttackDelay(entity.type)
+            end
+        end
+    else
+        -- Random wandering when player not in sight
+        if not entity.wander_timer or entity.wander_timer <= 0 then
+            entity.wander_angle = math.random() * 2 * math.pi
+            entity.wander_timer = 60 + math.random(120) -- 1-3 seconds at 30fps
+        end
+        entity.wander_timer = entity.wander_timer - 1
+        
+        -- Move in wander direction
+        local wander_speed = self:getEnemySpeed(entity.type) * 0.3
+        local new_x = entity.x + math.cos(entity.wander_angle) * wander_speed
+        local new_y = entity.y + math.sin(entity.wander_angle) * wander_speed
+        
+        if self:canMove(new_x, new_y) then
+            entity.x = new_x
+            entity.y = new_y
+        else
+            -- Change direction if blocked
+            entity.wander_timer = 0
         end
     end
+end
+
+function DoomGame:getEnemySpeed(type)
+    local speeds = {
+        [3004] = 1.0,  -- Zombieman
+        [9] = 1.0,     -- Shotgun guy
+        [3001] = 1.5,  -- Imp
+        [3002] = 2.0,  -- Demon (faster)
+        [3005] = 1.2,  -- Cacodemon
+        [3003] = 1.8   -- Baron of Hell
+    }
+    return speeds[type] or 1.0
+end
+
+function DoomGame:getAttackDelay(type)
+    local delays = {
+        [3004] = 60,   -- Zombieman: 2 seconds
+        [9] = 90,      -- Shotgun guy: 3 seconds
+        [3001] = 45,   -- Imp: 1.5 seconds
+        [3002] = 30,   -- Demon: 1 second
+        [3005] = 75,   -- Cacodemon: 2.5 seconds
+        [3003] = 90    -- Baron: 3 seconds
+    }
+    return delays[type] or 60
+end
+
+function DoomGame:enemyAttack(entity)
+    local dist = math.sqrt((entity.x - self.player.x)^2 + (entity.y - self.player.y)^2)
+    if dist < 64 then
+        local damage = self:getEnemyDamage(entity.type)
+        local actual_damage = math.random(damage.min, damage.max)
+        
+        -- Apply armor protection
+        if self.player.armor > 0 then
+            local armor_absorbed = math.min(actual_damage / 3, self.player.armor)
+            self.player.armor = self.player.armor - armor_absorbed
+            actual_damage = actual_damage - armor_absorbed
+        end
+        
+        self.player.health = self.player.health - actual_damage
+        logger.info(string.format("Player hit for %d damage by %s", actual_damage, entity.thing_type))
+    end
+end
+
+function DoomGame:getEnemyDamage(type)
+    local damages = {
+        [3004] = {min = 3, max = 15},   -- Zombieman
+        [9] = {min = 3, max = 15},      -- Shotgun guy
+        [3001] = {min = 3, max = 24},   -- Imp
+        [3002] = {min = 4, max = 40},   -- Demon
+        [3005] = {min = 10, max = 60},  -- Cacodemon
+        [3003] = {min = 8, max = 80}    -- Baron of Hell
+    }
+    return damages[type] or {min = 1, max = 5}
 end
 
 function DoomGame:hasLineOfSight(x1, y1, x2, y2)
@@ -915,11 +1058,140 @@ function DoomGame:hasLineOfSight(x1, y1, x2, y2)
 end
 
 function DoomGame:enemyAttack(entity)
-    -- Simple melee attack
     local dist = math.sqrt((entity.x - self.player.x)^2 + (entity.y - self.player.y)^2)
     if dist < 64 then
-        local damage = math.random(8, 24)
-        self.player.health = self.player.health - damage
+        local damage = self:getEnemyDamage(entity.type)
+        local actual_damage = math.random(damage.min, damage.max)
+        
+        -- Apply armor protection
+        if self.player.armor > 0 then
+            local armor_absorbed = math.min(actual_damage / 3, self.player.armor)
+            self.player.armor = self.player.armor - armor_absorbed
+            actual_damage = actual_damage - armor_absorbed
+        end
+        
+        self.player.health = self.player.health - actual_damage
+        logger.info(string.format("Player hit for %d damage by %s", actual_damage, entity.thing_type))
+    end
+end
+
+function DoomGame:getEnemyDamage(type)
+    local damages = {
+        [3004] = {min = 3, max = 15},   -- Zombieman
+        [9] = {min = 3, max = 15},      -- Shotgun guy
+        [3001] = {min = 3, max = 24},   -- Imp
+        [3002] = {min = 4, max = 40},   -- Demon
+        [3005] = {min = 10, max = 60},  -- Cacodemon
+        [3003] = {min = 8, max = 80}    -- Baron of Hell
+    }
+    return damages[type] or {min = 1, max = 5}
+end
+
+-- Add level progression and exit handling
+function DoomGame:checkLevelExit()
+    -- Check if player is near an exit
+    for _, linedef in ipairs(self.level.linedefs) do
+        if linedef.special == 11 or linedef.special == 52 then -- Exit specials
+            local v1 = self.level.vertexes[linedef.v1]
+            local v2 = self.level.vertexes[linedef.v2]
+            local dist = self:pointToLineDistance(self.player.x, self.player.y, v1.x, v1.y, v2.x, v2.y)
+            
+            if dist < 32 then
+                self:exitLevel()
+                return true
+            end
+        end
+    end
+    return false
+end
+
+function DoomGame:exitLevel()
+    if self:allEnemiesDead() then
+        self.game_state = "level_complete"
+        -- In a full implementation, this would load the next level
+        logger.info("Level completed!")
+    else
+        -- Show message that all enemies must be killed
+        logger.info("Must kill all enemies before exiting!")
+    end
+end
+
+-- Add weapon switching
+function DoomGame:switchWeapon(weapon_num)
+    if self.player.weapons[weapon_num] then
+        self.player.current_weapon = weapon_num
+    end
+end
+
+-- Add more weapon types
+function DoomGame:fireWeapon()
+    if self.game_state ~= "playing" then return end
+    
+    local weapon = self.player.current_weapon
+    if weapon == 1 then -- Fist
+        self:meleeAttack()
+    elseif weapon == 2 and self.player.ammo.shells > 0 then -- Shotgun
+        self.player.ammo.shells = self.player.ammo.shells - 1
+        self:fireHitscan(8, 5) -- 8 pellets, 5 damage each
+    elseif weapon == 3 and self.player.ammo.bullets > 0 then -- Chaingun
+        self.player.ammo.bullets = self.player.ammo.bullets - 1
+        self:fireHitscan(1, 10) -- Single bullet, 10 damage
+    elseif weapon == 4 and self.player.ammo.rockets > 0 then -- Rocket launcher
+        self.player.ammo.rockets = self.player.ammo.rockets - 1
+        self:fireProjectile("rocket", 100)
+    end
+end
+
+function DoomGame:fireProjectile(type, damage)
+    local projectile = {
+        x = self.player.x,
+        y = self.player.y,
+        z = self.player.z,
+        angle = self.player.angle,
+        dx = math.cos(self.player.angle) * 8,
+        dy = math.sin(self.player.angle) * 8,
+        damage = damage,
+        type = type,
+        life_time = 300 -- 10 seconds at 30fps
+    }
+    
+    table.insert(self.projectiles, projectile)
+end
+
+-- Enhanced pickup system
+function DoomGame:pickupItem(entity)
+    if entity.type == 2001 then -- Shotgun
+        self.player.weapons[2] = true
+        self.player.ammo.shells = self.player.ammo.shells + 8
+        if not self.player.weapons[self.player.current_weapon] or self.player.current_weapon == 1 then
+            self.player.current_weapon = 2
+        end
+    elseif entity.type == 2002 then -- Chaingun
+        self.player.weapons[3] = true
+        self.player.ammo.bullets = self.player.ammo.bullets + 20
+        if not self.player.weapons[self.player.current_weapon] or self.player.current_weapon == 1 then
+            self.player.current_weapon = 3
+        end
+    elseif entity.type == 2003 then -- Rocket launcher
+        self.player.weapons[4] = true
+        self.player.ammo.rockets = self.player.ammo.rockets + 2
+        if not self.player.weapons[self.player.current_weapon] or self.player.current_weapon < 4 then
+            self.player.current_weapon = 4
+        end
+    elseif entity.type == 2007 then -- Clip
+        self.player.ammo.bullets = self.player.ammo.bullets + 10
+    elseif entity.type == 2008 then -- Shells
+        self.player.ammo.shells = self.player.ammo.shells + 4
+    elseif entity.type == 2010 then -- Rocket ammo
+        self.player.ammo.rockets = self.player.ammo.rockets + 1
+    elseif entity.type == 2012 then -- Medikit
+        self.player.health = math.min(100, self.player.health + 25)
+    elseif entity.type == 2014 then -- Health bonus
+        self.player.health = math.min(200, self.player.health + 1)
+    elseif entity.type == 2018 then -- Green armor
+        self.player.armor = math.max(self.player.armor, 100)
+    elseif entity.type == 2019 then -- Blue armor
+        self.player.armor = math.max(self.player.armor, 200)
     end
 end
 
@@ -1131,28 +1403,92 @@ function DoomGame:getSpriteColor(entity_type)
 end
 
 function DoomGame:renderHUD()
-    local hud_height = 60
+    local hud_height = 80
     local hud_y = self.canvas_height - hud_height
     
     -- HUD background
     self.canvas.bb:paintRect(0, hud_y, self.canvas_width, hud_height, Blitbuffer.COLOR_GRAY_4)
     
-    -- Health
-    self:drawText(50, hud_y + 20, string.format("Health: %d", self.player.health), Blitbuffer.COLOR_BLACK)
+    -- Health display
+    local health_color = self.player.health > 75 and Blitbuffer.COLOR_BLACK or
+                        self.player.health > 25 and Blitbuffer.COLOR_GRAY or 
+                        Blitbuffer.COLOR_BLACK
+    self:drawText(50, hud_y + 15, string.format("Health: %d%%", self.player.health), health_color)
     
-    -- Armor
-    self:drawText(50, hud_y + 35, string.format("Armor: %d", self.player.armor), Blitbuffer.COLOR_BLACK)
+    -- Armor display
+    self:drawText(50, hud_y + 35, string.format("Armor: %d%%", self.player.armor), Blitbuffer.COLOR_BLACK)
     
-    -- Ammo
-    local ammo_text = string.format("Shells: %d", self.player.ammo.shells)
-    self:drawText(200, hud_y + 20, ammo_text, Blitbuffer.COLOR_BLACK)
+    -- Ammo display
+    local weapon = self.player.current_weapon
+    local ammo_text = ""
+    if weapon == 2 then
+        ammo_text = string.format("Shells: %d", self.player.ammo.shells)
+    elseif weapon == 3 then
+        ammo_text = string.format("Bullets: %d", self.player.ammo.bullets)
+    elseif weapon == 4 then
+        ammo_text = string.format("Rockets: %d", self.player.ammo.rockets)
+    else
+        ammo_text = "Unlimited"
+    end
+    self:drawText(200, hud_y + 15, ammo_text, Blitbuffer.COLOR_BLACK)
     
-    -- Score
+    -- Score and kills
+    local enemies_killed = 0
+    local total_enemies = 0
+    for _, entity in ipairs(self.entities) do
+        if self:isEnemy(entity.type) then
+            total_enemies = total_enemies + 1
+            if not entity.active then
+                enemies_killed = enemies_killed + 1
+            end
+        end
+    end
+    
     self:drawText(200, hud_y + 35, string.format("Score: %d", self.score), Blitbuffer.COLOR_BLACK)
+    self:drawText(200, hud_y + 55, string.format("Kills: %d/%d", enemies_killed, total_enemies), Blitbuffer.COLOR_BLACK)
     
     -- Current weapon
-    local weapon_name = self.player.current_weapon == 1 and "Fist" or "Shotgun"
-    self:drawText(350, hud_y + 20, weapon_name, Blitbuffer.COLOR_BLACK)
+    local weapons = {"Fist", "Shotgun", "Chaingun", "Rocket Launcher"}
+    local weapon_name = weapons[weapon] or "Unknown"
+    self:drawText(350, hud_y + 15, string.format("Weapon: %s", weapon_name), Blitbuffer.COLOR_BLACK)
+    
+    -- Level info
+    self:drawText(350, hud_y + 35, string.format("Level: %s", self.current_level), Blitbuffer.COLOR_BLACK)
+    
+    -- Game state messages
+    if self.game_state == "dead" then
+        self:drawText(self.canvas_width / 2, hud_y + 55, "PRESS PAUSE TO RESTART", Blitbuffer.COLOR_BLACK)
+    elseif self.game_state == "victory" then
+        self:drawText(self.canvas_width / 2, hud_y + 55, "LEVEL COMPLETE!", Blitbuffer.COLOR_BLACK)
+    elseif self.game_state == "level_complete" then
+        self:drawText(self.canvas_width / 2, hud_y + 55, "FIND THE EXIT!", Blitbuffer.COLOR_BLACK)
+    end
+end
+
+-- Add restart functionality
+function DoomGame:restartLevel()
+    self.game_state = "playing"
+    self.player.health = 100
+    self.player.armor = 0
+    self.score = 0
+    
+    -- Reset player position
+    self:findPlayerStart()
+    
+    -- Respawn all entities
+    self:spawnEntities()
+    
+    -- Clear projectiles
+    self.projectiles = {}
+end
+
+-- Override pause functionality to handle restart
+function DoomGame:onTogglePause()
+    if self.game_state == "dead" then
+        self:restartLevel()
+    else
+        BaseGame.onTogglePause(self)
+    end
 end
 
 function DoomGame:drawText(x, y, text, color)
