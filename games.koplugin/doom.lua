@@ -10,7 +10,7 @@ local _ = require("gettext")
 local logger = require("logger")
 
 local DoomGame = BaseGame:new{
-    game_title = _("Doom"),
+    game_title = _("Doom-Style Game"),
     tick_interval = 0.033, -- ~30 FPS
     wad_file = nil,
 }
@@ -1403,20 +1403,23 @@ function DoomGame:getSpriteColor(entity_type)
 end
 
 function DoomGame:renderHUD()
-    local hud_height = 80
+    local hud_height = 100  -- Increased to accommodate disclaimer
     local hud_y = self.canvas_height - hud_height
     
     -- HUD background
     self.canvas.bb:paintRect(0, hud_y, self.canvas_width, hud_height, Blitbuffer.COLOR_GRAY_4)
     
+    -- Disclaimer at top of HUD
+    self:drawText(self.canvas_width / 2, hud_y + 10, "Simplified Doom-style game (not original Doom)", Blitbuffer.COLOR_BLACK)
+    
     -- Health display
     local health_color = self.player.health > 75 and Blitbuffer.COLOR_BLACK or
                         self.player.health > 25 and Blitbuffer.COLOR_GRAY or 
                         Blitbuffer.COLOR_BLACK
-    self:drawText(50, hud_y + 15, string.format("Health: %d%%", self.player.health), health_color)
+    self:drawText(50, hud_y + 25, string.format("Health: %d%%", self.player.health), health_color)
     
     -- Armor display
-    self:drawText(50, hud_y + 35, string.format("Armor: %d%%", self.player.armor), Blitbuffer.COLOR_BLACK)
+    self:drawText(50, hud_y + 45, string.format("Armor: %d%%", self.player.armor), Blitbuffer.COLOR_BLACK)
     
     -- Ammo display
     local weapon = self.player.current_weapon
@@ -1430,7 +1433,7 @@ function DoomGame:renderHUD()
     else
         ammo_text = "Unlimited"
     end
-    self:drawText(200, hud_y + 15, ammo_text, Blitbuffer.COLOR_BLACK)
+    self:drawText(200, hud_y + 25, ammo_text, Blitbuffer.COLOR_BLACK)
     
     -- Score and kills
     local enemies_killed = 0
@@ -1444,24 +1447,24 @@ function DoomGame:renderHUD()
         end
     end
     
-    self:drawText(200, hud_y + 35, string.format("Score: %d", self.score), Blitbuffer.COLOR_BLACK)
-    self:drawText(200, hud_y + 55, string.format("Kills: %d/%d", enemies_killed, total_enemies), Blitbuffer.COLOR_BLACK)
+    self:drawText(200, hud_y + 45, string.format("Score: %d", self.score), Blitbuffer.COLOR_BLACK)
+    self:drawText(200, hud_y + 65, string.format("Kills: %d/%d", enemies_killed, total_enemies), Blitbuffer.COLOR_BLACK)
     
     -- Current weapon
     local weapons = {"Fist", "Shotgun", "Chaingun", "Rocket Launcher"}
     local weapon_name = weapons[weapon] or "Unknown"
-    self:drawText(350, hud_y + 15, string.format("Weapon: %s", weapon_name), Blitbuffer.COLOR_BLACK)
+    self:drawText(350, hud_y + 25, string.format("Weapon: %s", weapon_name), Blitbuffer.COLOR_BLACK)
     
     -- Level info
-    self:drawText(350, hud_y + 35, string.format("Level: %s", self.current_level), Blitbuffer.COLOR_BLACK)
+    self:drawText(350, hud_y + 45, string.format("Level: %s", self.current_level), Blitbuffer.COLOR_BLACK)
     
     -- Game state messages
     if self.game_state == "dead" then
-        self:drawText(self.canvas_width / 2, hud_y + 55, "PRESS PAUSE TO RESTART", Blitbuffer.COLOR_BLACK)
+        self:drawText(self.canvas_width / 2, hud_y + 75, "PRESS PAUSE TO RESTART", Blitbuffer.COLOR_BLACK)
     elseif self.game_state == "victory" then
-        self:drawText(self.canvas_width / 2, hud_y + 55, "LEVEL COMPLETE!", Blitbuffer.COLOR_BLACK)
+        self:drawText(self.canvas_width / 2, hud_y + 75, "LEVEL COMPLETE!", Blitbuffer.COLOR_BLACK)
     elseif self.game_state == "level_complete" then
-        self:drawText(self.canvas_width / 2, hud_y + 55, "FIND THE EXIT!", Blitbuffer.COLOR_BLACK)
+        self:drawText(self.canvas_width / 2, hud_y + 75, "FIND THE EXIT!", Blitbuffer.COLOR_BLACK)
     end
 end
 

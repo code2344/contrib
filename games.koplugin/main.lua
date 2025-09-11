@@ -95,7 +95,7 @@ function Games:createGameMenu()
             end
         },
         {
-            text = _("Doom"),
+            text = _("Doom-Style Game"),
             callback = function()
                 self:launchDoom()
             end

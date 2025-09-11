@@ -9,7 +9,7 @@ A comprehensive gaming plugin that brings classic games directly to your KOReade
 - **Snake**: Navigate the snake to eat food and grow while avoiding walls and yourself
 - **Pong**: Classic paddle game with AI opponent
 - **Minesweeper**: Logic puzzle game with hidden mines and numbered clues
-- **Doom**: Original Doom game engine with WAD file support
+- **Doom-Style Game**: A Doom-inspired raycasting game with basic WAD file support
 
 ### On-Screen Controls
 All games feature intuitive on-screen controls optimized for touchscreen devices:
@@ -18,17 +18,16 @@ All games feature intuitive on-screen controls optimized for touchscreen devices
 - Pause/Resume functionality
 - Exit option
 
-### Doom WAD Support
-The plugin supports loading original Doom WAD files with full gameplay:
-- Compatible with IWAD and PWAD files (Doom, Doom II, Final Doom)
-- Complete WAD file parsing including maps, textures, and game data
-- Authentic Doom engine with proper level geometry and physics
-- Full entity system including enemies, items, weapons, and pickups
-- Proper game mechanics: health, armor, ammo, scoring, and progression
-- Enemy AI with line-of-sight, pathfinding, and combat behaviors
-- Multiple weapon types: Fist, Shotgun, Chaingun, Rocket Launcher
-- Level completion detection and exit handling
-- Authentic raycasting 3D renderer optimized for e-ink displays
+### Doom-Style Game Features
+The plugin includes a simplified Doom-inspired game with basic WAD file support:
+- **Note**: This is NOT the original Doom game, but a simplified recreation
+- Basic WAD file parsing for level geometry (VERTEXES, LINEDEFS, SIDEDEFS, SECTORS, THINGS)
+- Simple raycasting 3D renderer optimized for e-ink displays
+- Basic entity system with enemies, items, and weapons
+- Simplified game mechanics: health, armor, ammo, and scoring
+- Basic enemy behavior (not original Doom AI)
+- Limited weapon types: Fist, Shotgun, Chaingun, Rocket Launcher
+- Basic collision detection and movement
 
 ## Installation
 
@@ -45,10 +44,12 @@ The plugin supports loading original Doom WAD files with full gameplay:
 3. Select your desired game from the list
 4. Use on-screen controls to play
 
-### Playing Doom
-1. Select "Doom" from the games menu
+### Playing the Doom-Style Game
+1. Select "Doom-Style Game" from the games menu
 2. Choose a WAD file using the file picker (DOOM.WAD, DOOM2.WAD, etc.)
-3. Use the comprehensive movement and combat controls:
+3. **Important**: This loads only the level geometry from WAD files
+4. **Note**: This is a simplified recreation, not the original Doom game
+5. Use the movement and combat controls:
    - ↑/↓: Move forward/backward
    - ◄/►: Turn left/right
    - ←/→: Strafe left/right
@@ -57,14 +58,20 @@ The plugin supports loading original Doom WAD files with full gameplay:
    - Weapon: Switch between available weapons
    - Pause: Pause game (press again when dead to restart)
 
-#### Doom Gameplay Features
-- **Combat System**: Fight against classic Doom enemies with proper AI
-- **Weapon Arsenal**: Fist, Shotgun, Chaingun, Rocket Launcher with realistic ammo management
-- **Health & Armor**: Collect health packs and armor for protection
-- **Level Progression**: Complete levels by eliminating all enemies and finding exits
-- **Scoring System**: Earn points for defeating enemies
-- **Authentic Physics**: Proper collision detection and movement mechanics
-- **Item Collection**: Pick up weapons, ammo, health, and armor throughout levels
+#### Doom-Style Game Features
+- **Simplified Combat**: Fight against basic enemies with simple AI behavior
+- **Basic Weapons**: Fist, Shotgun, Chaingun, Rocket Launcher with simplified mechanics
+- **Health & Armor**: Basic health and armor system
+- **Level Geometry**: Loads level layout from WAD files for exploration
+- **Simple Scoring**: Basic point system for defeating enemies
+- **Collision Detection**: Basic movement and collision system
+- **Item Collection**: Simple pickup system for weapons, ammo, and health
+
+**Important Limitations**:
+- This is NOT the original Doom game engine
+- Simplified AI and game mechanics
+- Basic graphics optimized for e-ink displays
+- Limited compared to authentic Doom experience
 
 ### Game Controls
 
