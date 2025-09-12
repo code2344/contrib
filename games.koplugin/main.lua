@@ -95,7 +95,7 @@ function Games:createGameMenu()
             end
         },
         {
-            text = _("Doom-Style Game"),
+            text = _("Original Doom"),
             callback = function()
                 self:launchDoom()
             end
@@ -170,6 +170,21 @@ function Games:launchDoom()
                 wad_file = file_path,
             }
             UIManager:show(doom_instance)
+        end,
+        onCancel = function()
+            -- Show info about where to get WAD files
+            local InfoMessage = require("ui/widget/infomessage")
+            local info_msg = InfoMessage:new{
+                text = _("To play Doom, you need a WAD file.\n\n") ..
+                       _("You can use:\n") ..
+                       _("• DOOM.WAD (original Doom)\n") ..
+                       _("• DOOM2.WAD (Doom II)\n") ..
+                       _("• FREEDOOM1.WAD (free alternative)\n") ..
+                       _("• FREEDOOM2.WAD (free alternative)\n\n") ..
+                       _("Place WAD files in a folder accessible to KOReader."),
+                width = Screen:getWidth() * 0.8,
+            }
+            UIManager:show(info_msg)
         end,
     }
     UIManager:show(path_chooser)

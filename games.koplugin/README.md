@@ -1,6 +1,6 @@
 # Games Plugin for KOReader
 
-A comprehensive gaming plugin that brings classic games directly to your KOReader environment.
+A comprehensive gaming plugin that brings classic games directly to your KOReader environment, including authentic original Doom gameplay.
 
 ## Features
 
@@ -9,7 +9,7 @@ A comprehensive gaming plugin that brings classic games directly to your KOReade
 - **Snake**: Navigate the snake to eat food and grow while avoiding walls and yourself
 - **Pong**: Classic paddle game with AI opponent
 - **Minesweeper**: Logic puzzle game with hidden mines and numbered clues
-- **Doom-Style Game**: A Doom-inspired raycasting game with basic WAD file support
+- **Original Doom**: Authentic Doom gameplay using real Doom ports and original WAD files
 
 ### On-Screen Controls
 All games feature intuitive on-screen controls optimized for touchscreen devices:
@@ -18,23 +18,33 @@ All games feature intuitive on-screen controls optimized for touchscreen devices
 - Pause/Resume functionality
 - Exit option
 
-### Doom-Style Game Features
-The plugin includes a simplified Doom-inspired game with basic WAD file support:
-- **Note**: This is NOT the original Doom game, but a simplified recreation
-- Basic WAD file parsing for level geometry (VERTEXES, LINEDEFS, SIDEDEFS, SECTORS, THINGS)
-- Simple raycasting 3D renderer optimized for e-ink displays
-- Basic entity system with enemies, items, and weapons
-- Simplified game mechanics: health, armor, ammo, and scoring
-- Basic enemy behavior (not original Doom AI)
-- Limited weapon types: Fist, Shotgun, Chaingun, Rocket Launcher
-- Basic collision detection and movement
+### Original Doom Features
+The plugin integrates with real Doom ports to provide authentic original Doom gameplay:
+- **Authentic Experience**: Uses real Doom engine ports (chocolate-doom, prboom-plus, crispy-doom, etc.)
+- **Original WAD Support**: Load and play original DOOM.WAD, DOOM2.WAD, or compatible WAD files
+- **Full Game Features**: Complete original Doom experience with all weapons, enemies, levels, and mechanics
+- **Touch Controls**: Custom on-screen controls integrated with KOReader for Doom input
+- **Process Management**: Launches Doom as a separate window while providing control interface
+
+#### Supported Doom Ports
+The plugin automatically detects and uses available Doom ports in order of preference:
+1. **chocolate-doom** (most authentic to original)
+2. **prboom-plus** (enhanced features)
+3. **crispy-doom** (quality of life improvements)
+4. **gzdoom** (modern features)
+5. **zdoom** (advanced port)
+6. **freedoom** (free alternative)
 
 ## Installation
 
 1. Download the games.koplugin folder
 2. Copy it to your KOReader plugins directory (typically `koreader/plugins/`)
-3. Restart KOReader
-4. Access games from the "More tools" menu
+3. **For Doom**: Install a compatible Doom port using your system package manager:
+   - Ubuntu/Debian: `sudo apt install chocolate-doom` or `sudo apt install prboom-plus`
+   - Fedora: `sudo dnf install chocolate-doom` or `sudo dnf install prboom-plus`
+   - Arch: `sudo pacman -S chocolate-doom` or `sudo pacman -S prboom-plus`
+4. Restart KOReader
+5. Access games from the "More tools" menu
 
 ## Usage
 
@@ -44,34 +54,38 @@ The plugin includes a simplified Doom-inspired game with basic WAD file support:
 3. Select your desired game from the list
 4. Use on-screen controls to play
 
-### Playing the Doom-Style Game
-1. Select "Doom-Style Game" from the games menu
+### Playing Original Doom
+1. Select "Original Doom" from the games menu
 2. Choose a WAD file using the file picker (DOOM.WAD, DOOM2.WAD, etc.)
-3. **Important**: This loads only the level geometry from WAD files
-4. **Note**: This is a simplified recreation, not the original Doom game
-5. Use the movement and combat controls:
-   - ↑/↓: Move forward/backward
-   - ◄/►: Turn left/right
-   - ←/→: Strafe left/right
-   - Fire: Attack with current weapon
-   - Use: Activate doors, switches, and pickups
-   - Weapon: Switch between available weapons
-   - Pause: Pause game (press again when dead to restart)
+3. **Note**: This launches the actual original Doom game using authentic Doom ports
+4. The game opens in a separate window with full original gameplay
+5. Use the KOReader control interface to control the game:
+   - **Movement**: Forward, Back, Turn Left/Right, Strafe Left/Right
+   - **Actions**: Fire, Use, Run
+   - **Weapons**: Direct weapon selection (Fist, Pistol, Shotgun, etc.)
+   - **Map**: Toggle automap
+   - **Pause**: Game pause functionality
 
-#### Doom-Style Game Features
-- **Simplified Combat**: Fight against basic enemies with simple AI behavior
-- **Basic Weapons**: Fist, Shotgun, Chaingun, Rocket Launcher with simplified mechanics
-- **Health & Armor**: Basic health and armor system
-- **Level Geometry**: Loads level layout from WAD files for exploration
-- **Simple Scoring**: Basic point system for defeating enemies
-- **Collision Detection**: Basic movement and collision system
-- **Item Collection**: Simple pickup system for weapons, ammo, and health
+#### Getting WAD Files
+You need original WAD files to play Doom:
+- **DOOM.WAD**: Original Doom (shareware version available free)
+- **DOOM2.WAD**: Doom II (commercial)
+- **FREEDOOM1.WAD/FREEDOOM2.WAD**: Free alternatives (available from freedoom.github.io)
+- **PLUTONIA.WAD/TNT.WAD**: Final Doom episodes
 
-**Important Limitations**:
-- This is NOT the original Doom game engine
-- Simplified AI and game mechanics
-- Basic graphics optimized for e-ink displays
-- Limited compared to authentic Doom experience
+Place WAD files in a directory accessible to KOReader (e.g., `/sdcard/doom/` or `/mnt/onboard/games/`).
+
+#### Doom Controls Mapping
+The on-screen controls map to standard Doom keys:
+- **Forward/Back**: Up/Down arrow keys
+- **Turn Left/Right**: Left/Right arrow keys  
+- **Strafe Left/Right**: Comma/Period keys
+- **Fire**: Ctrl key
+- **Use**: Spacebar
+- **Run**: Shift key
+- **Weapons 1-7**: Number keys 1-7
+- **Map**: Tab key
+- **Pause**: Escape key
 
 ### Game Controls
 
@@ -101,18 +115,27 @@ The plugin includes a simplified Doom-inspired game with basic WAD file support:
 ### Architecture
 - Modular design with base game class
 - Individual game modules for each game type
-- Canvas-based rendering system
+- Canvas-based rendering system for simple games
+- Process management system for Doom integration
 - Event-driven input handling
+
+### Doom Integration
+- **Process Management**: Launches Doom as separate process
+- **Input Forwarding**: Uses xdotool to send keyboard input to Doom window
+- **Window Management**: Handles Doom window focus and control
+- **Configuration**: Creates temporary Doom config files for optimal e-reader settings
 
 ### Performance
 - Optimized for e-ink displays
 - Adjustable frame rates per game
 - Efficient rendering using KOReader's widget system
+- Doom runs natively with full performance
 
 ### Compatibility
-- Works on all KOReader-supported devices
+- Works on all KOReader-supported Linux devices
 - Touch and keyboard input support
 - Responsive UI scaling
+- **Doom Requirements**: Linux system with X11 for window management
 
 ## Adding Custom Games
 
@@ -131,27 +154,42 @@ The plugin architecture supports adding new games:
 ### Common Issues
 - **Game won't start**: Check that all required files are present and paths are correct
 - **Controls not responding**: Ensure KOReader is up to date and touch interface is working
-- **Doom WAD not loading**: Verify WAD file is valid, accessible, and is an official IWAD/PWAD
-- **Doom crashes or freezes**: Large levels may require more memory; try simpler WAD files first
-- **Poor Doom performance**: Complex levels may run slowly on older devices; this is normal
 
 ### Doom-Specific Troubleshooting
-- **"Loading WAD file..." stuck**: WAD file may be corrupted or incompatible
-- **No enemies/items appear**: WAD file may be missing THINGS data
-- **Level geometry missing**: WAD file may have corrupted level data
-- **Controls feel sluggish**: Adjust movement speed in game settings if available
+- **"No Doom port found"**: Install a compatible Doom port using your package manager
+- **WAD file not loading**: Verify WAD file is valid and accessible
+- **Doom window doesn't respond to controls**: Ensure xdotool is installed (`sudo apt install xdotool`)
+- **Doom starts but no control**: Check that the Doom window has focus
+- **Performance issues**: Doom runs at native speed; any issues are system-related
+
+### Installation Issues
+- **Missing dependencies**: Install required packages:
+  ```bash
+  # Ubuntu/Debian
+  sudo apt install chocolate-doom xdotool
+  
+  # Fedora
+  sudo dnf install chocolate-doom xdotool
+  
+  # Arch
+  sudo pacman -S chocolate-doom xdotool
+  ```
 
 ### Performance Issues
-- Lower frame rates on older devices is normal
+- Simple games: Lower frame rates on older devices is normal
+- Doom: Runs at full native performance
 - Close other applications for better performance
 - Ensure sufficient free memory
 
 ## Requirements
 
-- KOReader v2023.01 or later
-- For Doom: Valid IWAD file (DOOM.WAD, DOOM2.WAD, PLUTONIA.WAD, TNT.WAD) or compatible PWAD
-- Minimum 100MB free space for full installation with WAD files
-- Sufficient memory for complex level geometry (typically 64MB+ recommended for Doom)
+- KOReader v2023.01 or later running on Linux
+- **For Doom**: 
+  - Compatible Doom port installed (chocolate-doom, prboom-plus, etc.)
+  - xdotool for input handling (`sudo apt install xdotool`)
+  - Valid IWAD file (DOOM.WAD, DOOM2.WAD, FREEDOOM1.WAD, etc.)
+  - X11 display server (standard on most Linux systems)
+- Minimum 100MB free space for installation with WAD files
 
 ## License
 
@@ -160,4 +198,4 @@ This plugin is distributed under the same license as KOReader.
 ## Credits
 
 Based on KOReader plugin architecture and classic game implementations.
-WAD file format support based on Doom engine specifications.
+Doom integration uses authentic Doom engine ports for original gameplay experience.
